@@ -1,0 +1,12 @@
+$kind: http-request
+name: http://localhost:4000/accounts/verify-email
+url: http://localhost:4000/accounts/verify-email
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"token\": \"afc83a51715bee284f4ae9ff92d14f8ff6b7abf2fb5ca63e84da3d23b4b6589ca203c91657b6a34d\"\r
+
+    }"
+order: 3228030514072884

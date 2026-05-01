@@ -1,0 +1,24 @@
+$kind: http-request
+name: http://localhost:4000/accounts/register
+url: http://localhost:4000/accounts/register
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \"title\": \"Mr\",\r
+
+    \"firstName\": \"Admin\",\r
+
+    \"lastName\": \"Gayo\",\r
+
+    \"email\": \"admin2@example.com\",\r
+
+    \"password\": \"asdf1234\",\r
+
+    \"confirmPassword\": \"asdf1234\",\r
+
+    \"acceptTerms\": true\r
+
+    }"
+order: 1777635840147
