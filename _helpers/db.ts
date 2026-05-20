@@ -14,22 +14,13 @@ async function initialize() {
     const database = process.env.DB_NAME;
 
     if (!host || !user || !password || !database) {
-        throw new Error(
-            'Missing required database environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME'
-        );
+        throw new Error('Missing required database environment variables');
     }
 
-    // Read CA cert from environment variable directly (no file needed)
     const caCert = process.env.DB_CA_CERT;
-    const sslOptions = caCert ? { ca: caCert } : {};
+    const sslOptions = caCert ? { ca: caCert } : { rejectUnauthorized: false };
 
-    const connection = await mysql.createConnection({ 
-        host, port, user, password,
-        ssl: sslOptions
-    });
-
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
-    await connection.end();
+    console.log(`Connecting to DB at ${host}:${port}`);
 
     const sequelize = new Sequelize(database, user, password, {
         host,
@@ -37,9 +28,13 @@ async function initialize() {
         dialect: 'mysql',
         logging: false,
         dialectOptions: {
-            ssl: sslOptions
+            ssl: sslOptions,
+            connectTimeout: 30000
         }
     });
+
+    await sequelize.authenticate();
+    console.log('DB connection established successfully.');
 
     db.Account = accountModel(sequelize);
     db.RefreshToken = refreshTokenModel(sequelize);
@@ -48,6 +43,10 @@ async function initialize() {
     db.RefreshToken.belongsTo(db.Account);
 
     await sequelize.sync();
+    console.log('DB synced successfully.');
 }
 
-initialize();
+initialize().catch(err => {
+    console.error('Failed to initialize database:', err.message);
+    process.exit(1);
+});
