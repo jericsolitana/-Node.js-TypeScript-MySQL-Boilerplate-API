@@ -2,69 +2,52 @@ import mysql from 'mysql2/promise';
 import { Sequelize } from 'sequelize';
 import accountModel from '../accounts/account.model';
 import refreshTokenModel from '../accounts/refresh-token.model';
-import * as fs from 'fs';
-import * as path from 'path';
 
 const db: any = {};
 export default db;
 
 async function initialize() {
-    // Read database configuration from environment variables
     const host = process.env.DB_HOST;
     const port = process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306;
     const user = process.env.DB_USER;
     const password = process.env.DB_PASSWORD;
     const database = process.env.DB_NAME;
 
-    // Validate required variables
-    if (!host || !user || ! password || !database) {
+    if (!host || !user || !password || !database) {
         throw new Error(
             'Missing required database environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME'
         );
     }
 
-    // ----- SSL Configuration for Aiven -----
-    const caCertPath = path.join(__dirname, '../', process.env.DB_CA_CERT || 'ca.pem');
-    let sslOptions = {};
-    if (fs.existsSync(caCertPath)) {
-        sslOptions = { ca: fs.readFileSync(caCertPath) };
-        console.log(`SSL CA certificate found at ${caCertPath}`);
-    } else {
-        console.warn(`SSL CA certificate not found at ${caCertPath}. Connecting without SSL (not recommended for Aiven).`);
-    }
+    // Read CA cert from environment variable directly (no file needed)
+    const caCert = process.env.DB_CA_CERT;
+    const sslOptions = caCert ? { ca: caCert } : {};
 
-    // Create initial connection (without database selected)
     const connection = await mysql.createConnection({ 
-        host, port, user, password, 
-        ssl: sslOptions   // <-- ADD SSL HERE
+        host, port, user, password,
+        ssl: sslOptions
     });
 
-    // Create database if it doesn't exist
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
     await connection.end();
 
-    // Connect to the specific database using Sequelize
     const sequelize = new Sequelize(database, user, password, {
-        host: host,
-        port: port,
+        host,
+        port,
         dialect: 'mysql',
         logging: false,
         dialectOptions: {
-            ssl: sslOptions   // <-- ADD SSL HERE
+            ssl: sslOptions
         }
     });
 
-    // Initialize models
     db.Account = accountModel(sequelize);
     db.RefreshToken = refreshTokenModel(sequelize);
 
-    // Set up associations
     db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
     db.RefreshToken.belongsTo(db.Account);
 
-    // Sync database schema
     await sequelize.sync();
 }
 
-// Run initialization
 initialize();
