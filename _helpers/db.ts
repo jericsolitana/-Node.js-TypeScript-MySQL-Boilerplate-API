@@ -2,6 +2,8 @@ import mysql from 'mysql2/promise';
 import { Sequelize } from 'sequelize';
 import accountModel from '../accounts/account.model';
 import refreshTokenModel from '../accounts/refresh-token.model';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const db: any = {};
 export default db;
@@ -15,14 +17,27 @@ async function initialize() {
     const database = process.env.DB_NAME;
 
     // Validate required variables
-    if (!host || !user || !password || !database) {
+    if (!host || !user || ! password || !database) {
         throw new Error(
             'Missing required database environment variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME'
         );
     }
 
+    // ----- SSL Configuration for Aiven -----
+    const caCertPath = path.join(__dirname, '../', process.env.DB_CA_CERT || 'ca.pem');
+    let sslOptions = {};
+    if (fs.existsSync(caCertPath)) {
+        sslOptions = { ca: fs.readFileSync(caCertPath) };
+        console.log(`SSL CA certificate found at ${caCertPath}`);
+    } else {
+        console.warn(`SSL CA certificate not found at ${caCertPath}. Connecting without SSL (not recommended for Aiven).`);
+    }
+
     // Create initial connection (without database selected)
-    const connection = await mysql.createConnection({ host, port, user, password });
+    const connection = await mysql.createConnection({ 
+        host, port, user, password, 
+        ssl: sslOptions   // <-- ADD SSL HERE
+    });
 
     // Create database if it doesn't exist
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
@@ -33,7 +48,10 @@ async function initialize() {
         host: host,
         port: port,
         dialect: 'mysql',
-        logging: false // Disable logging in production (optional)
+        logging: false,
+        dialectOptions: {
+            ssl: sslOptions   // <-- ADD SSL HERE
+        }
     });
 
     // Initialize models

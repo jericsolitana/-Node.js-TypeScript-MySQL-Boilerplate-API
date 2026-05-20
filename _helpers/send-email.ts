@@ -1,13 +1,17 @@
 import nodemailer from 'nodemailer';
-import config from '../config.json';
 
-export default async function sendEmail({ to, subject, html, from = config.emailFrom }: any) {
-    const transporter = nodemailer.createTransport(config.smtpOptions);
+export default async function sendEmail({ to, subject, html, from = process.env.EMAIL_FROM }: any) {
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT),
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+        }
+    });
 
-    // SEND EMAIL
     const info = await transporter.sendMail({ from, to, subject, html });
 
-    // ✅ ADD THESE LINES
     console.log("Message sent:", info.messageId);
     console.log("Preview URL:", nodemailer.getTestMessageUrl(info));
 }
