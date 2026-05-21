@@ -21,7 +21,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // handle preflight
+app.options('/*', cors(corsOptions)); // handle preflight
 
 // api routes
 app.use('/accounts', accountsController);
