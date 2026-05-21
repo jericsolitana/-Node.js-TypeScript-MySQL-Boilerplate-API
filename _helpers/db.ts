@@ -18,7 +18,7 @@ async function initialize() {
     }
 
     const caCert = process.env.DB_CA_CERT;
-    const sslOptions = caCert ? { ca: caCert } : { rejectUnauthorized: false };
+    const sslOptions = caCert ? { ca: caCert } : undefined;
 
     console.log(`Connecting to DB at ${host}:${port}`);
 
@@ -27,8 +27,7 @@ async function initialize() {
         port,
         dialect: 'mysql',
         logging: false,
-        dialectOptions: {
-            ssl: sslOptions,
+       dialectOptions: {
             connectTimeout: 30000
         }
     });
