@@ -12,7 +12,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// CORS configuration
 const corsOptions = {
     origin: true,
     credentials: true,
@@ -21,7 +20,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('/*', cors(corsOptions)); // handle preflight
 
 // api routes
 app.use('/accounts', accountsController);
