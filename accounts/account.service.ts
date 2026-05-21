@@ -198,7 +198,11 @@ async function hash(password: any) {
 }
 
 function generateJwtToken(account: any) {
-    return jwt.sign({ sub: account.id, id: account.id, role: account.role }, process.env.JWT_SECRET!, { expiresIn: '15m' });
+    return jwt.sign(
+        { sub: account.id, id: account.id, role: account.role }, 
+        process.env.JWT_SECRET!, 
+        { expiresIn: '7d' } // Change from 15m to 7d
+    );
 }
 
 function generateRefreshToken(account: any, ipAddress: any) {
