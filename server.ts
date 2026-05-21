@@ -21,6 +21,14 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// root route
+app.get('/', (req: any, res: any) => {
+    res.json({ 
+        message: 'IPT 2026 Backend API is running!',
+        docs: 'https://ipt-2026-backend-jwmv.onrender.com/api-docs'
+    });
+});
+
 // api routes
 app.use('/accounts', accountsController);
 app.use('/api-docs', swaggerDocs);
