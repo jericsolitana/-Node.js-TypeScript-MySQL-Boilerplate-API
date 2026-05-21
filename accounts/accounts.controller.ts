@@ -174,7 +174,8 @@ function createSchema(req: any, res: any, next: any) {
         email: Joi.string().email().required(),
         password: Joi. string().min(6).required(),
         confirmPassword: Joi. string().valid(Joi.ref('password')).required(),
-        role: Joi.string().valid(Role.Admin, Role.User).required()
+        role: Joi.string().valid(Role.Admin, Role.User).required(),
+        acceptTerms: Joi.boolean().valid(true).required()  // ← add this
     });
     validateRequest(req, next, schema);
 }
