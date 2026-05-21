@@ -91,7 +91,8 @@ function registerSchema(req: any, res: any, next: any) {
 }
 
 function register(req: any, res: any, next: any) {
-    accountService. register(req.body, req.get('origin' ))
+    console.log('Register request received:', req.body);
+    accountService.register(req.body, req.get('origin'))
         .then(() => res.json({ message: 'Registration successful, please check your email for verification instructions' }))
         .catch(next);
 }
