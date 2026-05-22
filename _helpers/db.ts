@@ -1,4 +1,3 @@
-import mysql from 'mysql2/promise';
 import { Sequelize } from 'sequelize';
 import accountModel from '../accounts/account.model';
 import refreshTokenModel from '../accounts/refresh-token.model';
@@ -17,9 +16,6 @@ async function initialize() {
         throw new Error('Missing required database environment variables');
     }
 
-    const caCert = process.env.DB_CA_CERT;
-    const sslOptions = caCert ? { ca: caCert } : undefined;
-
     console.log(`Connecting to DB at ${host}:${port}`);
 
     const sequelize = new Sequelize(database, user, password, {
@@ -27,8 +23,12 @@ async function initialize() {
         port,
         dialect: 'mysql',
         logging: false,
-       dialectOptions: {
+        dialectOptions: {
             connectTimeout: 30000
+        },
+        define: {
+            charset: 'utf8mb4',
+            collate: 'utf8mb4_general_ci'
         }
     });
 
@@ -41,8 +41,8 @@ async function initialize() {
     db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
     db.RefreshToken.belongsTo(db.Account);
 
-   await sequelize.sync({ alter: true });
-console.log('DB synced successfully.');
+    await sequelize.sync({ alter: true });
+    console.log('DB synced successfully.');
 }
 
 initialize().catch(err => {
