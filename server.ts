@@ -20,6 +20,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); 
 
 // root route
 app.get('/', (req: any, res: any) => {
