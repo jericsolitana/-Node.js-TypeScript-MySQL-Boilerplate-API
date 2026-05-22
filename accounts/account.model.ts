@@ -1,8 +1,4 @@
-import { genSalt } from "bcryptjs";
-import { timeStamp } from "node:console";
-import { create } from "node:domain";
-import { title } from "node:process";
-import { DataType, DataTypes } from "sequelize";   
+import { DataTypes } from "sequelize";   
 
 export default function model(sequelize: any) {
     const attributes: any = {
@@ -19,19 +15,18 @@ export default function model(sequelize: any) {
         resetTokenExpires: { type: DataTypes.DATE },
         passwordReset: { type: DataTypes.DATE },
         created: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
-        updated: { type: DataTypes.DATE,},
+        updated: { type: DataTypes.DATE },
         isVerified: {   
             type: DataTypes.VIRTUAL,
-            get () { return !!(this.verified || this.passwordReset);
-
-        } }
+            get() { return !!(this.getDataValue('verified') || this.getDataValue('passwordReset')); }
+        }
     };
 
     const options = {
-        timeStamp: false,
+        timestamps: false,
         defaultScope: { attributes: { exclude: ['passwordHash'] } },
-        scopes: { withHash: { attributes: {}, } }
+        scopes: { withHash: { attributes: {} } }
     };
-    return sequelize.define('Account', attributes, options);
-    }
 
+    return sequelize.define('Account', attributes, options);
+}
