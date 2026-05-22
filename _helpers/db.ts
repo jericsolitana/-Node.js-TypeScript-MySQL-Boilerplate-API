@@ -41,8 +41,8 @@ async function initialize() {
     db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
     db.RefreshToken.belongsTo(db.Account);
 
-    await sequelize.sync();
-    console.log('DB synced successfully.');
+   await sequelize.sync({ alter: true });
+console.log('DB synced successfully.');
 }
 
 initialize().catch(err => {
